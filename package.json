@@ -19,5 +19,11 @@
   "bugs": {
     "url": "https://github.com/luisrene88/inline-react/issues"
   },
-  "homepage": "https://github.com/luisrene88/inline-react#readme"
+  "homepage": "https://github.com/luisrene88/inline-react#readme",
+  "devDependencies": {
+    "browserify": "^14.4.0",
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1",
+    "react-slick": "^0.14.11"
+  }
 }
