@@ -4,7 +4,10 @@
   "description": "react version for inline widget",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "browserify": "browserify -t [ babelify --presets [ react ] ] static/src/inline.jsx -o static/dist/app.js",
+    "jsx-compile": "babel --presets react portal/static/viewjs/src --watch --out-dir portal/static/viewjs",
+    "start": "concurrently --kill-others \"npm run browserify\""
   },
   "repository": {
     "type": "git",
@@ -21,7 +24,10 @@
   },
   "homepage": "https://github.com/luisrene88/inline-react#readme",
   "devDependencies": {
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^7.3.0",
     "browserify": "^14.4.0",
+    "concurrently": "^3.5.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-slick": "^0.14.11"
