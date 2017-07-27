@@ -1,6 +1,6 @@
-var React = require('react');
-var ReactDOM = require('react-dom');
-var Carousel = require('./modules/carousel.jsx');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import Carousel from './modules/carousel.jsx';
 
 class Inline extends React.Component{
   render(){

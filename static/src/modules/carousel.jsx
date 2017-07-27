@@ -1,11 +1,11 @@
-var React = require('react');
-var Slider = require('react-slick');
+import React from 'react';
+import Slider from 'react-slick';
 
-var Carousel = React.createClass({
-  render: function() {
+class Carousel extends React.Component{
+  render(){
     var settings = {
       dots: true
-    }
+    };
     return (
       <div className='container'>
         <Slider {...settings}>
@@ -17,6 +17,5 @@ var Carousel = React.createClass({
       </div>
     );
   }
-});
-
+};
 module.exports = Carousel;
