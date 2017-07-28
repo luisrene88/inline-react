@@ -33,9 +33,12 @@
     "browser-sync": "^2.18.13",
     "browserify": "^14.4.0",
     "concurrently": "^3.5.0",
+    "jquery": "^3.2.1",
     "react": "^15.6.1",
+    "react-aspect-ratio": "^1.0.12",
     "react-dom": "^15.6.1",
     "react-slick": "^0.14.11",
+    "slick-carousel": "^1.6.0",
     "watchify": "^3.9.0"
   }
 }
