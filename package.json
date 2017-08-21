@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "browserify": "browserify -t [ babelify --presets [ react ] ] static/src/inline.jsx -o static/dist/app.js",
+    "browserify": "browserify -t [babelify --presets es2015 --presets react] -o static/dist/app.js static/src/main.js",
+    "jsx-watch": "watchify -v -t [babelify --presets es2015 --presets react] -o static/dist/app.js static/src/main.js",
     "jsx-compile": "babel --presets react portal/static/viewjs/src --watch --out-dir portal/static/viewjs",
-    "jsx-watch": "watchify -t [ babelify --presets [ es2015 react ] ] ./static/src/*.jsx -o ./static/dist/app.js -v",
     "browser-sync": "browser-sync start --files \"./dist/css/*.css, ./static/dist/*.js\" --proxy 127.0.0.1:8080 --reload-delay=300 --reload-debounce=500",
     "server": "python -m SimpleHTTPServer 8080",
     "start": "concurrently --kill-others \"npm run server\" \"npm run browser-sync\" \"npm run jsx-watch\""
@@ -33,12 +33,25 @@
     "browser-sync": "^2.18.13",
     "browserify": "^14.4.0",
     "concurrently": "^3.5.0",
+    "css-modulesify": "^0.28.0",
     "jquery": "^3.2.1",
+    "jss": "^8.1.0",
+    "jss-preset-default": "^3.0.0",
+    "node-fetch": "^1.7.2",
+    "prop-types": "^15.5.10",
     "react": "^15.6.1",
     "react-aspect-ratio": "^1.0.12",
     "react-dom": "^15.6.1",
+    "react-jss": "^7.0.2",
+    "react-modal": "^2.2.3",
+    "react-resize": "^0.4.0",
+    "react-resize-to-aspect-ratio": "^1.0.7",
+    "react-scrollbar": "^0.5.1",
     "react-slick": "^0.14.11",
     "slick-carousel": "^1.6.0",
     "watchify": "^3.9.0"
+  },
+  "dependencies": {
+    "react-resize-to-aspect-ratio": "^1.0.7"
   }
 }
