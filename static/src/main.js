@@ -22,6 +22,7 @@ let utils = {
 
 function Widget(props){
   let widgetType = utils.getType(props);
+  //debugger;
   switch (widgetType) {
     case 'Carousel':
       return <Carousel {...props}/>;
