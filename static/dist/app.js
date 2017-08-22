@@ -13932,8 +13932,8 @@ var propObj = exports.propObj = {
   'box-shadow': {
     x: 0,
     y: 0,
-    blur: null,
-    spread: null,
+    blur: 0,
+    spread: 0,
     color: null,
     inset: null
   },
@@ -33973,6 +33973,8 @@ var _react2 = _interopRequireDefault(_react);
 
 var _theming = require('theming');
 
+var _theming2 = _interopRequireDefault(_theming);
+
 var _jss = require('./jss');
 
 var _jss2 = _interopRequireDefault(_jss);
@@ -34002,6 +34004,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
 
 // Like a Symbol
 var dynamicStylesNs = Math.random();
@@ -34049,6 +34053,12 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
 
   var isThemingEnabled = typeof stylesOrCreator === 'function';
 
+  var _options$theming = options.theming,
+      theming = _options$theming === undefined ? _theming2['default'] : _options$theming,
+      sheetOptions = _objectWithoutProperties(options, ['theming']);
+
+  var themeListener = theming.themeListener;
+
   var displayName = 'Jss(' + (0, _getDisplayName2['default'])(InnerComponent) + ')';
   var noTheme = {};
   var manager = new _jss.SheetsManager();
@@ -34064,7 +34074,7 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
 
       _initialiseProps.call(_this);
 
-      var theme = isThemingEnabled ? _theming.themeListener.initial(context) : noTheme;
+      var theme = isThemingEnabled ? themeListener.initial(context) : noTheme;
 
       _this.state = _this.createState({ theme: theme });
       return _this;
@@ -34081,7 +34091,7 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
 
         if (!staticSheet) {
           var styles = getStyles(stylesOrCreator, theme);
-          staticSheet = this.jss.createStyleSheet(styles, _extends({}, options, this.context[ns.sheetOptions], {
+          staticSheet = this.jss.createStyleSheet(styles, _extends({}, sheetOptions, this.context[ns.sheetOptions], {
             meta: displayName + ', ' + (isThemingEnabled ? 'Themed' : 'Unthemed') + ', Static'
           }));
           this.manager.add(theme, staticSheet);
@@ -34090,7 +34100,7 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
         } else dynamicStyles = staticSheet[dynamicStylesNs];
 
         if (dynamicStyles) {
-          dynamicSheet = this.jss.createStyleSheet(dynamicStyles, _extends({}, options, this.context[ns.sheetOptions], {
+          dynamicSheet = this.jss.createStyleSheet(dynamicStyles, _extends({}, sheetOptions, this.context[ns.sheetOptions], {
             meta: displayName + ', ' + (isThemingEnabled ? 'Themed' : 'Unthemed') + ', Dynamic',
             link: true
           }));
@@ -34123,7 +34133,7 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
       key: 'componentDidMount',
       value: function componentDidMount() {
         if (isThemingEnabled) {
-          this.unsubscribe = _theming.themeListener.subscribe(this.context, this.setTheme);
+          this.unsubscribe = themeListener.subscribe(this.context, this.setTheme);
         }
       }
     }, {
@@ -34193,7 +34203,7 @@ exports['default'] = function (stylesOrCreator, InnerComponent) {
     }]);
 
     return Jss;
-  }(_react.Component), _class.displayName = displayName, _class.InnerComponent = InnerComponent, _class.contextTypes = _extends({}, _contextTypes2['default'], isThemingEnabled && _theming.themeListener.contextTypes), _class.defaultProps = InnerComponent.defaultProps, _initialiseProps = function _initialiseProps() {
+  }(_react.Component), _class.displayName = displayName, _class.InnerComponent = InnerComponent, _class.contextTypes = _extends({}, _contextTypes2['default'], isThemingEnabled && themeListener.contextTypes), _class.defaultProps = InnerComponent.defaultProps, _initialiseProps = function _initialiseProps() {
     var _this2 = this;
 
     this.setTheme = function (theme) {
@@ -34230,6 +34240,12 @@ Object.defineProperty(exports, 'withTheme', {
   enumerable: true,
   get: function get() {
     return _theming.withTheme;
+  }
+});
+Object.defineProperty(exports, 'createTheming', {
+  enumerable: true,
+  get: function get() {
+    return _theming.createTheming;
   }
 });
 
@@ -34770,6 +34786,10 @@ var ModalPortal = function (_Component) {
       _this.shouldClose = false;
     };
 
+    _this.handleContentOnMouseDown = function () {
+      _this.shouldClose = false;
+    };
+
     _this.requestClose = function (event) {
       return _this.ownerHandlesClose() && _this.props.onRequestClose(event);
     };
@@ -34917,6 +34937,7 @@ var ModalPortal = function (_Component) {
             className: this.buildClassName('content', className),
             tabIndex: '-1',
             onKeyDown: this.handleKeyDown,
+            onMouseDown: this.handleContentOnMouseDown,
             onClick: this.handleContentOnClick,
             role: this.props.role,
             'aria-label': this.props.contentLabel
@@ -39791,13 +39812,17 @@ var _propTypes = require('prop-types');
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
 
+var _jquery = require('jquery');
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
 var _carousel = require('./modules/carousel.js');
 
 var _carousel2 = _interopRequireDefault(_carousel);
 
-var _jquery = require('jquery');
+var _sidebar = require('./modules/sidebar.js');
 
-var _jquery2 = _interopRequireDefault(_jquery);
+var _sidebar2 = _interopRequireDefault(_sidebar);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39806,6 +39831,34 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+/* MODULES */
+
+
+var utils = {
+  isset: function isset(o, p) {
+    var val = o;
+    if (p) val = o[p];
+    return "undefined" !== typeof val;
+  },
+  getType: function getType(e) {
+    if (!e || !utils.isset(e, "config") || !utils.isset(e.config, "type")) throw new Error("Must pass \"Widget.TYPE\"");
+    var evt = e.config.type;
+    return evt.charAt(0).toUpperCase() + evt.slice(1);
+  }
+};
+
+function Widget(props) {
+  var widgetType = utils.getType(props);
+  switch (widgetType) {
+    case 'Carousel':
+      return _react2.default.createElement(_carousel2.default, props);
+      break;
+    case 'Sidebar':
+      return _react2.default.createElement(_sidebar2.default, props);
+      break;
+  }
+}
 
 var Main = function (_React$Component) {
   _inherits(Main, _React$Component);
@@ -39822,7 +39875,7 @@ var Main = function (_React$Component) {
       return _react2.default.createElement(
         'div',
         { id: 'tvp_' + this.props.name + '_root' },
-        _react2.default.createElement(_carousel2.default, this.props),
+        _react2.default.createElement(Widget, this.props),
         _react2.default.createElement('div', { id: 'tvp_' + this.props.name + '_modal_holder' })
       );
     }
@@ -39842,7 +39895,7 @@ __TVPage__.config = __TVPage__.config || {};
 var config = __TVPage__.config['category-page-carousel'];
 
 if (!config.hasOwnProperty('targetEl') || !document.getElementById(config.targetEl)) {
-  throw new Error("Must provide \"targetEl\"");
+  throw new Error("Must pass \"targetEl\"");
 }
 
 var targetEl = config.targetEl;
@@ -39886,7 +39939,7 @@ fetchData(logId, channId).then(function (videoResponse) {
   (0, _reactDom.render)(_react2.default.createElement(Main, { config: config, name: targetEl, videosArray: videoResponse }), document.getElementById(targetEl));
 });
 
-},{"./modules/carousel.js":287,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
+},{"./modules/carousel.js":287,"./modules/sidebar.js":289,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -40188,6 +40241,7 @@ var Product = function (_React$Component) {
 	_createClass(Product, [{
 		key: 'render',
 		value: function render() {
+			console.log(this.props.name);
 			_reactJss.jss.setup({
 				insertionPoint: document.getElementById('tvp_' + this.props.name + '_root')
 			});
@@ -40204,7 +40258,75 @@ var Product = function (_React$Component) {
 
 exports.default = Product;
 
-},{"../style_modules/product_styles.js":289,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],289:[function(require,module,exports){
+},{"../style_modules/product_styles.js":290,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],289:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactJss = require('react-jss');
+
+var _reactJss2 = _interopRequireDefault(_reactJss);
+
+var _sidebar_styles = require('../style_modules/sidebar_styles.js');
+
+var _sidebar_styles2 = _interopRequireDefault(_sidebar_styles);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ToStyle = function ToStyle(props) {
+  return _react2.default.createElement(
+    'div',
+    { className: props.classes.tvp_sidebar },
+    'sidebar'
+  );
+};
+
+var Styled = (0, _reactJss2.default)(_sidebar_styles2.default)(ToStyle);
+
+var Sidebar = function (_React$Component) {
+  _inherits(Sidebar, _React$Component);
+
+  function Sidebar() {
+    _classCallCheck(this, Sidebar);
+
+    return _possibleConstructorReturn(this, (Sidebar.__proto__ || Object.getPrototypeOf(Sidebar)).apply(this, arguments));
+  }
+
+  _createClass(Sidebar, [{
+    key: 'render',
+    value: function render() {
+      console.log(this.props.name);
+      _reactJss.jss.setup({
+        insertionPoint: document.getElementById('tvp_' + this.props.name + '_root')
+      });
+      return _react2.default.createElement(
+        _reactJss.ThemeProvider,
+        { theme: this.props.config },
+        _react2.default.createElement(Styled, this.props)
+      );
+    }
+  }]);
+
+  return Sidebar;
+}(_react2.default.Component);
+
+exports.default = Sidebar;
+
+},{"../style_modules/sidebar_styles.js":291,"react":278,"react-jss":226}],290:[function(require,module,exports){
 'use strict';
 
 var styles = function styles(style) {
@@ -40238,6 +40360,19 @@ var styles = function styles(style) {
 			}
 		}
 	};
+};
+
+module.exports = styles;
+
+},{}],291:[function(require,module,exports){
+"use strict";
+
+var styles = function styles(style) {
+  return {
+    tvp_sidebar: {
+      color: "red"
+    }
+  };
 };
 
 module.exports = styles;

@@ -1,14 +1,42 @@
 import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import Carousel from './modules/carousel.js';
 import $ from 'jquery';
+
+/* MODULES */
+import Carousel from './modules/carousel.js';
+import Sidebar from './modules/sidebar.js';
+
+let utils = {
+  isset: function(o,p){
+      let val = o;
+      if (p) val = o[p];
+      return "undefined" !== typeof val;
+  },
+  getType: function(e){
+    if (!e || !utils.isset(e, "config") || !utils.isset(e.config, "type")) throw new Error("Must pass \"Widget.TYPE\"");
+    let evt = e.config.type;
+    return evt.charAt(0).toUpperCase() + evt.slice(1);
+  }
+};
+
+function Widget(props){
+  let widgetType = utils.getType(props);
+  switch (widgetType) {
+    case 'Carousel':
+      return <Carousel {...props}/>;
+      break;
+    case 'Sidebar':
+      return <Sidebar {...props}/>;
+      break;
+   }
+}
 
 class Main extends React.Component{
   render(){
     return (
       <div id={'tvp_'+this.props.name+'_root'}>
-        <Carousel {...this.props}/>
+        <Widget {...this.props}/>
         <div id={'tvp_'+this.props.name+'_modal_holder'}></div>
       </div>
     );
@@ -26,7 +54,7 @@ __TVPage__.config = __TVPage__.config || {};
 const config = __TVPage__.config['category-page-carousel'];
 
 if (!config.hasOwnProperty('targetEl') || !document.getElementById(config.targetEl)) {
-  throw new Error("Must provide \"targetEl\"");
+  throw new Error("Must pass \"targetEl\"");
 }
 
 const targetEl = config.targetEl;

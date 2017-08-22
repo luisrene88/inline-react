@@ -30,6 +30,7 @@ const StyledProduct = injectSheet(styles)(ProductToStyle);
 
 export default class Product extends React.Component{
 	render(){
+		console.log(this.props.name)
 		jss.setup({
 			insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
 		});
