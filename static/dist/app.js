@@ -39903,7 +39903,167 @@ fetchData(logId, channId).then(function (videoResponse) {
   (0, _reactDom.render)(_react2.default.createElement(Main, { config: config, name: targetEl, videosArray: videoResponse }), document.getElementById(targetEl));
 });
 
-},{"./modules/carousel.js":287,"./modules/sidebar.js":289,"./utils.js":294,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
+},{"./modules/carousel.js":288,"./modules/sidebar.js":290,"./utils.js":295,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+// Inspiration from: https://www.fullstackreact.com/articles/Declaratively_loading_JS_libraries/index.html
+// Summary: This is a handy class for dynamically loading and using external/remote JS libraries in a ReactJS app
+// ================================================================================
+// Usage: In React, instantiate a ScriptCache either as a var or a Component member/property in the 
+// `componentWillMount()` lifecycle method:
+//      const cache = new ScriptCache(["http://remote.cdn.com/myLibrary.min.js", "http://..."]); | OR |
+//      this.scriptCache = new ScriptCache(["http://remote.cdn.com/myLibrary.min.js", "http://..."]);
+// THEN:
+//      cache.onLoad( ... ) [optional; once the cache has been instantiated, the file will be loaded into the document]
+// ================================================================================
+// NOTES:
+// Depending on _what_ needs access to _which_ script, you may need to access 
+// the resulting library off the `window` object, e.g. 
+// const google = window.google
+var SCRIPT_STATUS = {
+    COMPLETE: "complete",
+    ERROR: "error"
+};
+
+var ScriptCache = function () {
+    function ScriptCache(scripts) {
+        _classCallCheck(this, ScriptCache);
+
+        this.loaded = [];
+        this.failed = [];
+        this.pending = [];
+        this.load(scripts);
+    }
+
+    _createClass(ScriptCache, [{
+        key: "onLoad",
+        value: function onLoad(success, reject) {}
+        // You can use this block to run any additional setup required after
+        // the scripts have loaded
+
+
+        /**
+         * This will loop through and load any scripts passed into the class constructor */
+
+    }, {
+        key: "load",
+        value: function load() {
+            var scripts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : [];
+
+            if (!scripts.length) return;
+            var scriptPromises = [];
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+                for (var _iterator = scripts[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                    var script = _step.value;
+
+                    scriptPromises.push(this.loadScript(script));
+                }
+            } catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+            } finally {
+                try {
+                    if (!_iteratorNormalCompletion && _iterator.return) {
+                        _iterator.return();
+                    }
+                } finally {
+                    if (_didIteratorError) {
+                        throw _iteratorError;
+                    }
+                }
+            }
+
+            return Promise.all(scriptPromises);
+        }
+
+        /**
+         * This loads a single script from its source. The 'loading' action is wrapped
+         * in a promise, which should fail if the script cannot be fetched */
+
+    }, {
+        key: "loadScript",
+        value: function loadScript(script) {
+            var _this = this;
+
+            if (this.loaded.indexOf(script) > -1) return Promise.resolve(script);
+            this.pending.push(script);
+            return this.createScriptTag(script).then(function (script) {
+                debugger;
+                _this.loaded.push(script);
+                _this.pending.splice(_this.pending.indexOf(script), 1);
+                return script;
+            }).catch(function (e) {
+                debugger;
+                _this.failed.push(script);
+                _this.pending.splice(_this.pending.indexOf(script), 1);
+            });
+        }
+
+        /**
+         * This creates a <script> tag and appends it to the document body */
+
+    }, {
+        key: "createScriptTag",
+        value: function createScriptTag(scriptSrc, onComplete) {
+            debugger;
+            return new Promise(function (resolve, reject) {
+                var resolved = false,
+                    errored = false,
+                    body = document.body,
+                    tag = document.createElement("script");
+
+                var handleLoad = function handleLoad(event) {
+                    resolved = true;resolve(scriptSrc);
+                };
+                var handleReject = function handleReject(event) {
+                    errored = true;reject(scriptSrc);
+                };
+                var handleComplete = function handleComplete() {
+                    if (resolved) return handleLoad();
+                    if (errored) return handleReject();
+
+                    var status = ScriptCache.SCRIPT_STATUS;
+                    var state = tag.readyState;
+                    if (state === status.COMPLETE) handleLoad();else if (state === status.ERROR) handleReject();
+                };
+
+                tag.type = "text/javascript";
+                tag.async = false;
+                // Replace 'onComplete' callback reference in some script tag urls (e.g. Google Maps V3)
+                if (scriptSrc.match(/callback=CALLBACK_NAME/)) {
+                    var onCompleteName = "onScriptSrcLoaded";
+                    scriptSrc = scriptSrc.replace(/(callback=)[^&]+/, "$1" + onCompleteName);
+                    window[onCompleteName] = handleLoad;
+                } else tag.addEventListener("load", handleLoad);
+
+                tag.addEventListener("error", handleReject);
+                tag.onreadystatechange = handleComplete;
+                tag.src = scriptSrc;
+                body.appendChild(tag);
+
+                return tag;
+            });
+        }
+    }]);
+
+    return ScriptCache;
+}();
+
+exports.default = ScriptCache;
+
+},{}],288:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40022,7 +40182,7 @@ Carousel.propTypes = {
 
 module.exports = Carousel;
 
-},{"../style_modules/carousel_styles.js":291,"../utils.js":294,"./product.js":288,"./videoItem.js":290,"prop-types":92,"react":278,"react-jss":226,"react-slick":245}],288:[function(require,module,exports){
+},{"../style_modules/carousel_styles.js":292,"../utils.js":295,"./product.js":289,"./videoItem.js":291,"prop-types":92,"react":278,"react-jss":226,"react-slick":245}],289:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40046,6 +40206,10 @@ var _reactScrollbar2 = _interopRequireDefault(_reactScrollbar);
 var _reactResizeToAspectRatio = require('react-resize-to-aspect-ratio');
 
 var _reactResizeToAspectRatio2 = _interopRequireDefault(_reactResizeToAspectRatio);
+
+var _ScriptCache = require('./ScriptCache.js');
+
+var _ScriptCache2 = _interopRequireDefault(_ScriptCache);
 
 var _product_styles = require('../style_modules/product_styles.js');
 
@@ -40094,6 +40258,14 @@ var Product = function (_React$Component) {
 	}
 
 	_createClass(Product, [{
+		key: 'componentWillMount',
+		value: function componentWillMount() {
+			var cache = new _ScriptCache2.default(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js']);
+			cache.onLoad(function () {
+				debugger;
+			});
+		}
+	}, {
 		key: 'render',
 		value: function render() {
 			_reactJss.jss.setup({
@@ -40117,7 +40289,7 @@ Product.propTypes = {
 
 module.exports = Product;
 
-},{"../style_modules/product_styles.js":292,"prop-types":92,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],289:[function(require,module,exports){
+},{"../style_modules/product_styles.js":293,"./ScriptCache.js":287,"prop-types":92,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],290:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40191,7 +40363,7 @@ Sidebar.propTypes = {
 
 module.exports = Sidebar;
 
-},{"../style_modules/sidebar_styles.js":293,"prop-types":92,"react":278,"react-jss":226}],290:[function(require,module,exports){
+},{"../style_modules/sidebar_styles.js":294,"prop-types":92,"react":278,"react-jss":226}],291:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -40361,7 +40533,7 @@ VideoItem.propTypes = {
 
 module.exports = VideoItem;
 
-},{"./product.js":288,"prop-types":92,"react":278,"react-jss":226,"react-modal":239,"react-resize-to-aspect-ratio":240}],291:[function(require,module,exports){
+},{"./product.js":289,"prop-types":92,"react":278,"react-jss":226,"react-modal":239,"react-resize-to-aspect-ratio":240}],292:[function(require,module,exports){
 "use strict";
 
 var styles = function styles(style) {
@@ -40397,7 +40569,7 @@ module.exports = styles;
 // stroke-linecap: round;
 // stroke-width: 5;
 
-},{}],292:[function(require,module,exports){
+},{}],293:[function(require,module,exports){
 'use strict';
 
 var styles = function styles(style) {
@@ -40435,7 +40607,7 @@ var styles = function styles(style) {
 
 module.exports = styles;
 
-},{}],293:[function(require,module,exports){
+},{}],294:[function(require,module,exports){
 "use strict";
 
 var styles = function styles(style) {
@@ -40448,7 +40620,7 @@ var styles = function styles(style) {
 
 module.exports = styles;
 
-},{}],294:[function(require,module,exports){
+},{}],295:[function(require,module,exports){
 "use strict";
 
 module.exports = {

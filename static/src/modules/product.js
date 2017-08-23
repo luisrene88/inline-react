@@ -4,7 +4,7 @@ import injectSheet, {ThemeProvider,jss} from 'react-jss';
 
 import ScrollArea from 'react-scrollbar';
 import Resize from 'react-resize-to-aspect-ratio';
-
+import ScriptCache from './ScriptCache.js';
 import styles from	'../style_modules/product_styles.js';
 
 const ProductToStyle = props => {
@@ -31,6 +31,13 @@ function eachProduct(obj, index){
 const StyledProduct = injectSheet(styles)(ProductToStyle);
 
 class Product extends React.Component{
+	componentWillMount() {
+		var cache = new ScriptCache(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js',]);
+		cache.onLoad(() => {
+      		debugger;
+      		
+    	});
+	}
 	render(){
 		jss.setup({
 			insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
