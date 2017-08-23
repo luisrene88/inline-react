@@ -1,18 +1,21 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
+
 import styles from  '../style_modules/sidebar_styles.js';
 
 const ToStyle = props => {
   return (
-    <div className={props.classes.tvp_sidebar}>sidebar</div>
+    <div className={props.classes.tvp_sidebar}>
+      sidebar
+    </div>
   );
 };
 
 const Styled = injectSheet(styles)(ToStyle);
 
-export default class Sidebar extends React.Component{
+class Sidebar extends React.Component{
   render(){
-    console.log(this.props.name)
     jss.setup({
       insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
     });
@@ -22,4 +25,11 @@ export default class Sidebar extends React.Component{
       </ThemeProvider>
     );
   }
-}
+};
+
+Sidebar.propTypes = {
+  name: PropTypes.string.isRequired,
+  videosArray: PropTypes.array.isRequired
+};
+
+module.exports = Sidebar;

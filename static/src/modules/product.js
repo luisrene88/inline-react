@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
 
 import ScrollArea from 'react-scrollbar';
@@ -18,6 +19,7 @@ const ProductToStyle = props => {
 };
 
 function eachProduct(obj, index){
+	// retrieve originalProps with 'this'
 	const prodImg = { 'backgroundImage':'url('+obj.imageUrl+')' };
 	return(
 		<Resize aspectRatio="16:9" key={index} className={this.classes.tvp_product_item_container}>
@@ -28,9 +30,8 @@ function eachProduct(obj, index){
 
 const StyledProduct = injectSheet(styles)(ProductToStyle);
 
-export default class Product extends React.Component{
+class Product extends React.Component{
 	render(){
-		console.log(this.props.name)
 		jss.setup({
 			insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
 		});
@@ -41,3 +42,10 @@ export default class Product extends React.Component{
 		);
 	}
 }
+
+Product.propTypes = {
+  name: PropTypes.string.isRequired,
+  currentVideo: PropTypes.object.isRequired
+};
+
+module.exports = Product;

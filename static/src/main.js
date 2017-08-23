@@ -2,34 +2,23 @@ import React from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
 import $ from 'jquery';
-
-/* MODULES */
-import Carousel from './modules/carousel.js';
-import Sidebar from './modules/sidebar.js';
-
-let utils = {
-  isset: function(o,p){
-      let val = o;
-      if (p) val = o[p];
-      return "undefined" !== typeof val;
-  },
-  getType: function(e){
-    if (!e || !utils.isset(e, "config") || !utils.isset(e.config, "type")) throw new Error("Must pass \"Widget.TYPE\"");
-    let evt = e.config.type;
-    return evt.charAt(0).toUpperCase() + evt.slice(1);
-  }
-};
+import Utils from './utils.js';
 
 function Widget(props){
-  let widgetType = utils.getType(props);
+  const widgetProps = Object.assign({}, props);
+  const widgetType = Utils.getType(props);
+  Utils.removeObjectProperties(widgetProps.config,['type']);
+
+  let Widget_required;
   switch (widgetType) {
     case 'Carousel':
-      return <Carousel {...props}/>;
+      Widget_required = require('./modules/carousel.js');
       break;
     case 'Sidebar':
-      return <Sidebar {...props}/>;
+      Widget_required = require('./modules/sidebar.js');
       break;
    }
+   return <Widget_required {...widgetProps}/>;
 }
 
 class Main extends React.Component{
