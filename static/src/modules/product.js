@@ -32,11 +32,10 @@ const StyledProduct = injectSheet(styles)(ProductToStyle);
 
 class Product extends React.Component{
 	componentWillMount() {
-		var cache = new ScriptCache(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js',]);
-		cache.onLoad(() => {
-      		debugger;
-      		
-    	});
+		if (!window.TVPage) new ScriptCache(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js']);
+	}
+	componentWillUnmount(){
+		console.log('unmount')
 	}
 	render(){
 		jss.setup({

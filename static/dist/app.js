@@ -40000,12 +40000,12 @@ var ScriptCache = function () {
             if (this.loaded.indexOf(script) > -1) return Promise.resolve(script);
             this.pending.push(script);
             return this.createScriptTag(script).then(function (script) {
-                debugger;
+                // debugger;
                 _this.loaded.push(script);
                 _this.pending.splice(_this.pending.indexOf(script), 1);
                 return script;
             }).catch(function (e) {
-                debugger;
+                // debugger;
                 _this.failed.push(script);
                 _this.pending.splice(_this.pending.indexOf(script), 1);
             });
@@ -40017,7 +40017,7 @@ var ScriptCache = function () {
     }, {
         key: "createScriptTag",
         value: function createScriptTag(scriptSrc, onComplete) {
-            debugger;
+            // debugger;
             return new Promise(function (resolve, reject) {
                 var resolved = false,
                     errored = false,
@@ -40260,10 +40260,12 @@ var Product = function (_React$Component) {
 	_createClass(Product, [{
 		key: 'componentWillMount',
 		value: function componentWillMount() {
-			var cache = new _ScriptCache2.default(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js']);
-			cache.onLoad(function () {
-				debugger;
-			});
+			if (!window.TVPage) new _ScriptCache2.default(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js']);
+		}
+	}, {
+		key: 'componentWillUnmount',
+		value: function componentWillUnmount() {
+			console.log('unmount');
 		}
 	}, {
 		key: 'render',
