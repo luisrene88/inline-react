@@ -53,13 +53,13 @@ export default class ScriptCache {
         this.pending.push(script);
         return this.createScriptTag(script)
             .then((script) => {
-            	debugger;
+            	// debugger;
                 this.loaded.push(script);
                 this.pending.splice(this.pending.indexOf(script), 1);
                 return script;
             })
             .catch((e) => {
-            	debugger;
+            	// debugger;
                 this.failed.push(script);
                 this.pending.splice(this.pending.indexOf(script), 1);
             })
@@ -68,7 +68,7 @@ export default class ScriptCache {
     /**
      * This creates a <script> tag and appends it to the document body */
      createScriptTag(scriptSrc, onComplete){
-     	debugger;
+     	// debugger;
      	return new Promise((resolve, reject) => {
         let resolved = false,
             errored = false,

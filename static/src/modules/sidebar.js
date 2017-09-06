@@ -1,8 +1,8 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
 
-import styles from  '../style_modules/sidebar_styles.js';
+import styles from  '../style_modules/sidebar_styles';
 
 const ToStyle = props => {
   return (
@@ -14,7 +14,7 @@ const ToStyle = props => {
 
 const Styled = injectSheet(styles)(ToStyle);
 
-class Sidebar extends React.Component{
+class Sidebar extends Component{
   render(){
     jss.setup({
       insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')

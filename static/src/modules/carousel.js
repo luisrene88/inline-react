@@ -1,16 +1,15 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
-import Utils from '../utils.js';
+import Utils from '../utils';
 
-import styles from  '../style_modules/carousel_styles.js';
+import styles from  '../style_modules/carousel_styles';
 
 import Slider from 'react-slick';
-import Product from './product.js';
-import VideoItem from './videoItem.js';
+import VideoItem from './videoItem';
 
 const ToStyle = props => {
-  const videosArray = props.videosArray || [];
+  const videoList = props.videoList || [];
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -23,7 +22,7 @@ const ToStyle = props => {
   return (
     <div className={props.classes.tvp_carousel_container}>
       <Slider {...sliderSettings}>
-        {videosArray.map(eachItem,props)}
+        {videoList.map(eachItem,props)}
       </Slider>
     </div>
   );
@@ -33,7 +32,7 @@ function eachItem(obj, index){
   // retrieve originalProps with 'this'
   const originalProps = Object.assign({}, this);
   // avoid style related conflicts between modules, sremove classes,sheet and theme from props obj.
-  Utils.removeObjectProperties(originalProps,['videosArray','classes','sheet','theme']);
+  Utils.removeObjectProperties(originalProps,['videoList','classes','sheet','theme']);
 
   return(
     <div key={index}>
@@ -44,13 +43,13 @@ function eachItem(obj, index){
 
 const Styled = injectSheet(styles)(ToStyle);
 
-class Carousel extends React.Component{
+class Carousel extends Component{
   render(){
     jss.setup({
-      insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
+      insertionPoint: document.getElementById('tvp_'+this.props.targetEl+'_root')
     });
     return (
-      <ThemeProvider theme={this.props.config}>
+      <ThemeProvider theme={this.props}>
         <Styled {...this.props}/>
       </ThemeProvider>
     );
@@ -58,8 +57,7 @@ class Carousel extends React.Component{
 };
 
 Carousel.propTypes = {
-  name: PropTypes.string.isRequired,
-  videosArray: PropTypes.array.isRequired
+  targetEl: PropTypes.string.isRequired
 };
 
 module.exports = Carousel;

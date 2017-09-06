@@ -1,14 +1,14 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
 
-// import styles from  '../style_modules/videoItem_styles.js';
+// import styles from  '../style_modules/videoItem_styles';
 
 import Resize from  'react-resize-to-aspect-ratio';
 import Modal from 'react-modal';
-import Product from './product.js';
+import Product from './product';
 
-class VideoItem extends React.Component{
+class VideoItem extends Component{
   constructor(props) {
     super(props);
     this.state = {
@@ -65,7 +65,7 @@ class VideoItem extends React.Component{
       }
     },
     getParent = function(){
-      return document.querySelector('#tvp_'+this.props.name+'_modal_holder');
+      return document.querySelector('#tvp_'+this.props.targetEl+'_modal_holder');
     };
     return(
       <div>
@@ -79,18 +79,18 @@ class VideoItem extends React.Component{
           shouldCloseOnOverlayClick={true}
           style={modalStyles}
           parentSelector={getParent.bind(this)}
-          bodyOpenClassName={'tvp_'+this.props.name + "_modal_open"}
-          contentLabel={'tvp_'+this.props.name + '_modal'}
-          portalClassName={'tvp_'+this.props.name + '_modal_container'}
+          bodyOpenClassName={'tvp_'+this.props.targetEl + "_modal_open"}
+          contentLabel={'tvp_'+this.props.targetEl + '_modal'}
+          portalClassName={'tvp_'+this.props.targetEl + '_modal_container'}
           className={{
-            base: 'tvp_'+this.props.name + '_modal',
-            afterOpen: 'tvp_'+this.props.name + '_modal_afterOpen',
-            beforeClose: 'tvp_'+this.props.name + '_modal_beforeClose'
+            base: 'tvp_'+this.props.targetEl + '_modal',
+            afterOpen: 'tvp_'+this.props.targetEl + '_modal_afterOpen',
+            beforeClose: 'tvp_'+this.props.targetEl + '_modal_beforeClose'
           }}
           overlayClassName={{
-            base: 'tvp_'+this.props.name + '_modal_overlay',
-            afterOpen: 'tvp_'+this.props.name + '_modal_overlay_afterOpen',
-            beforeClose: 'tvp_'+this.props.name + '_modal_overlay_beforeClose'
+            base: 'tvp_'+this.props.targetEl + '_modal_overlay',
+            afterOpen: 'tvp_'+this.props.targetEl + '_modal_overlay_afterOpen',
+            beforeClose: 'tvp_'+this.props.targetEl + '_modal_overlay_beforeClose'
           }}
         >
           <h2>{this.props.currentVideo.title}</h2>
@@ -104,7 +104,7 @@ class VideoItem extends React.Component{
 };
 
 VideoItem.propTypes = {
-  name: PropTypes.string.isRequired
+  targetEl: PropTypes.string.isRequired
 };
 
 module.exports = VideoItem;
