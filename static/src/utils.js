@@ -26,6 +26,12 @@ module.exports = {
         dataType: 'jsonp'
       }));
   },
+  uniqueHashClassName: function(rule, sheet){
+    console.log(this)
+    let random = Math.floor(Math.random().toString());
+    let current_date = (new Date()).valueOf().toString();
+    return 'tvp_'+current_date + random;
+  },
   getType: function(e){
     if (!e || !this.isset(e, "type")) throw new Error("Must pass \"Widget.TYPE\"");
     let evt = e.type;

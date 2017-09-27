@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
+import jssCache from 'jss-cache';
 import Utils from '../utils';
 
 import styles from  '../style_modules/carousel_styles';
@@ -20,7 +21,7 @@ const ToStyle = props => {
     slidesToScroll: 1
   };
   return (
-    <div className={props.classes.tvp_carousel_container}>
+    <div className={props.classes.carousel_container}>
       <Slider {...sliderSettings}>
         {videoList.map(eachItem,props)}
       </Slider>
@@ -42,11 +43,18 @@ function eachItem(obj, index){
 } 
 
 const Styled = injectSheet(styles)(ToStyle);
+const createGenerateClassName = () => {
+  let random = Math.floor(Math.random().toString());
+  let current_date = (new Date()).valueOf().toString();
+  return (rule, sheet) => `tvp_${current_date + random}`
+};
 
 class Carousel extends Component{
   render(){
-    jss.setup({
-      insertionPoint: document.getElementById('tvp_'+this.props.targetEl+'_root')
+    console.log(document.getElementById('tvp_'+this.props.targetEl+'_styles_holder'))
+    jss.use(jssCache);
+    jss.setup({createGenerateClassName},{
+      insertionPoint: document.getElementById('tvp_'+this.props.targetEl+'_styles_holder')
     });
     return (
       <ThemeProvider theme={this.props}>

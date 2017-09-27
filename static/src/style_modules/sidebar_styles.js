@@ -1,9 +1,5 @@
-const styles = (style) => {
-  return({
-    tvp_sidebar:{
+export default {
+   tvp_sidebar:{
       color:"red"
     }
-  });               
-};
-
-module.exports = styles;
+}

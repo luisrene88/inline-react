@@ -1,6 +1,6 @@
 const styles = (style) => {
 	return({
-		tvp_carousel_container:{
+		carousel_container:{
 			margin: "0 auto",
 			padding: "40px",
 			maxWidth: "100%",

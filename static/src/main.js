@@ -49,6 +49,7 @@ class Main extends Component{
           : <Widget videoList={this.state.videoList} {...this.props.config}/>
         }
         <div id={'tvp_'+this.props.config.targetEl+'_modal_holder'}></div>
+        <div id={'tvp_'+this.props.config.targetEl+'_styles_holder'}></div>
       </div>
     );
   }
