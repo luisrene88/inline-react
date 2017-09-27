@@ -1,16 +1,17 @@
-import React from 'react';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import injectSheet, {ThemeProvider,jss} from 'react-jss';
-import Utils from '../utils.js';
+import Utils from '../utils';
 
-import styles from  '../style_modules/carousel_styles.js';
+import styles from  '../style_modules/carousel_styles';
 
 import Slider from 'react-slick';
-import Product from './product.js';
-import VideoItem from './videoItem.js';
+import VideoItem from './videoItem';
+import Modal from 'react-modal';
+import ModalContent from  './modalContent'
 
 const ToStyle = props => {
-  const videosArray = props.videosArray || [];
+  const videoList = props.videoList || [];
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -23,7 +24,7 @@ const ToStyle = props => {
   return (
     <div className={props.classes.tvp_carousel_container}>
       <Slider {...sliderSettings}>
-        {videosArray.map(eachItem,props)}
+        {videoList.map(eachItem,props)}
       </Slider>
     </div>
   );
@@ -33,33 +34,65 @@ function eachItem(obj, index){
   // retrieve originalProps with 'this'
   const originalProps = Object.assign({}, this);
   // avoid style related conflicts between modules, sremove classes,sheet and theme from props obj.
-  Utils.removeObjectProperties(originalProps,['videosArray','classes','sheet','theme']);
+  Utils.removeObjectProperties(originalProps,['videoList','classes','sheet','theme']);
 
   return(
     <div key={index}>
-      <VideoItem currentVideo={obj} {...originalProps}/>
+      <VideoItem handleClick={this.handleClick} currentVideo={obj} {...originalProps}/>
     </div>
   );
 } 
 
 const Styled = injectSheet(styles)(ToStyle);
 
-class Carousel extends React.Component{
+class Carousel extends Component{
+  constructor(props){
+    super(props);
+
+    this.state = {
+      video: null,
+      modalIsOpen: false
+    };
+  }
+  closeModal(){
+    this.setState({
+      video: null,
+      modalIsOpen: false
+    });
+  }
+  handleClick(vid, isOpen){
+    this.setState(() => {
+      let newState = {};
+      newState['video'] = vid;
+      newState['modalIsOpen'] = isOpen;
+      return newState;
+    });
+  }
   render(){
     jss.setup({
-      insertionPoint: document.getElementById('tvp_'+this.props.name+'_root')
+      insertionPoint: document.getElementById('tvp_'+this.props.targetEl+'_root')
     });
     return (
-      <ThemeProvider theme={this.props.config}>
-        <Styled {...this.props}/>
+      <ThemeProvider theme={this.props}>
+        <div>
+          <Styled handleClick={this.handleClick.bind(this)} {...this.props}/>
+          {this.state.video && 
+            <Modal 
+            isOpen={this.state.modalIsOpen}
+            onRequestClose={this.closeModal.bind(this)} 
+            contentLabel={this.state.video.title}
+            >
+              <ModalContent closeModal={this.closeModal.bind(this)} video={this.state.video} config={this.props}/>
+            </Modal>
+          }
+        </div>
       </ThemeProvider>
     );
   }
 };
 
 Carousel.propTypes = {
-  name: PropTypes.string.isRequired,
-  videosArray: PropTypes.array.isRequired
+  targetEl: PropTypes.string.isRequired
 };
 
 module.exports = Carousel;

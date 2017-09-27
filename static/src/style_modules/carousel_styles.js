@@ -1,4 +1,4 @@
-const styles = (style) => {console.log(style)
+const styles = (style) => {
 	return({
 		tvp_carousel_container:{
 			margin: "0 auto",

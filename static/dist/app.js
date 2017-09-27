@@ -39779,6 +39779,8 @@ module.exports = warning;
 },{"_process":87}],286:[function(require,module,exports){
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
@@ -39795,9 +39797,13 @@ var _jquery = require('jquery');
 
 var _jquery2 = _interopRequireDefault(_jquery);
 
-var _utils = require('./utils.js');
+var _utils = require('./utils');
 
 var _utils2 = _interopRequireDefault(_utils);
+
+var _loader = require('./modules/loader');
+
+var _loader2 = _interopRequireDefault(_loader);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39809,48 +39815,73 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function Widget(props) {
   var widgetProps = Object.assign({}, props);
-  var widgetType = _utils2.default.getType(props);
-  _utils2.default.removeObjectProperties(widgetProps.config, ['type']);
+  _utils2.default.removeObjectProperties(widgetProps, ['type']);
 
-  var Widget_required = void 0;
-  switch (widgetType) {
+  var WidgetRequired = void 0;
+  switch (_utils2.default.getType(props)) {
     case 'Carousel':
-      Widget_required = require('./modules/carousel.js');
+      WidgetRequired = require('./modules/carousel.js');
       break;
     case 'Sidebar':
-      Widget_required = require('./modules/sidebar.js');
+      WidgetRequired = require('./modules/sidebar.js');
       break;
   }
-  return _react2.default.createElement(Widget_required, widgetProps);
+  return _react2.default.createElement(WidgetRequired, widgetProps);
 }
 
-var Main = function (_React$Component) {
-  _inherits(Main, _React$Component);
+var Main = function (_Component) {
+  _inherits(Main, _Component);
 
-  function Main() {
+  function Main(props) {
     _classCallCheck(this, Main);
 
-    return _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).call(this, props));
+
+    _this.state = {
+      videoList: null
+    };
+    return _this;
   }
 
   _createClass(Main, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      var _this2 = this;
+
+      var config = this.props.config;
+      var logId = config.loginId;
+      var channId = config.channel.id;
+
+      _utils2.default.fetchData(logId, channId, config, false).then(function (res) {
+        _this2.setState({
+          videoList: res
+        });
+        var data = _this2.state.videoList;
+        data.map(testFunct);
+      });
+      var testFunct = function testFunct(data) {
+        for (var i = 0; i < data.lenght; i++) {
+          console.log(data[i]);
+        }
+      };
+    }
+  }, {
     key: 'render',
     value: function render() {
       return _react2.default.createElement(
         'div',
-        { id: 'tvp_' + this.props.name + '_root' },
-        _react2.default.createElement(Widget, this.props),
-        _react2.default.createElement('div', { id: 'tvp_' + this.props.name + '_modal_holder' })
+        { id: 'tvp_' + this.props.config.targetEl + '_root' },
+        !this.state.videoList ? _react2.default.createElement(_loader2.default, { config: this.props.config }) : _react2.default.createElement(Widget, _extends({ videoList: this.state.videoList }, this.props.config)),
+        _react2.default.createElement('div', { id: 'tvp_' + this.props.config.targetEl + '_modal_holder' })
       );
     }
   }]);
 
   return Main;
-}(_react2.default.Component);
+}(_react.Component);
 
 Main.PropTypes = {
-  name: _propTypes2.default.string.isRequired,
-  videosArray: _propTypes2.default.array.isRequired
+  config: _propTypes2.default.array.isRequired
 };
 
 window.__TVPage__ = window.__TVPage__ || {};
@@ -39862,48 +39893,9 @@ if (!config.hasOwnProperty('targetEl') || !document.getElementById(config.target
   throw new Error("Must pass \"targetEl\"");
 }
 
-var targetEl = config.targetEl;
-var logId = config.loginId || config.loginid || 0;
-var channel = config.channel || {};
-var channId = config.channelId || config.channel.id;
+(0, _reactDom.render)(_react2.default.createElement(Main, { config: config }), document.getElementById(config.targetEl));
 
-function fetchData(loginId, itemId, getProducts) {
-  if (!loginId) return console.warn('Need loginId');
-  var cbName = 'tvp_' + Math.floor(Math.random() * 555);
-  var url = void 0;
-  if (!getProducts) {
-    url = config.api_base_url + '/channels/' + itemId + '/videos?X-login-id=' + loginId + '&p=0&n=1000&callback=' + cbName;
-    var params = config.channel.parameters || {};
-    for (var i in params) {
-      if (!params[i] || !params[i].length) break;
-      url += "&" + i + "=" + params[i];
-    }
-  } else {
-    url = config.api_base_url + '/videos/' + itemId + '/products?X-login-id=' + loginId + '&callback=' + cbName;
-  }
-
-  return Promise.resolve(_jquery2.default.get({
-    url: url,
-    type: 'GET',
-    crossDomain: true,
-    dataType: 'jsonp'
-  }));
-}
-
-fetchData(logId, channId).then(function (videoResponse) {
-  if (!videoResponse || !videoResponse.length) return console.error('No Videos/Data');
-  videoResponse.map(function (prods, index) {
-    fetchData(logId, prods.id, true).then(function (productsRes) {
-      if (!productsRes || !productsRes.length) return;
-      if (index !== 1) {
-        prods.videoProducts = productsRes;
-      }
-    });
-  });
-  (0, _reactDom.render)(_react2.default.createElement(Main, { config: config, name: targetEl, videosArray: videoResponse }), document.getElementById(targetEl));
-});
-
-},{"./modules/carousel.js":288,"./modules/sidebar.js":290,"./utils.js":295,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
+},{"./modules/carousel.js":288,"./modules/loader":289,"./modules/sidebar.js":294,"./utils":302,"jquery":46,"prop-types":92,"react":278,"react-dom":94}],287:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40082,11 +40074,11 @@ var _reactJss = require('react-jss');
 
 var _reactJss2 = _interopRequireDefault(_reactJss);
 
-var _utils = require('../utils.js');
+var _utils = require('../utils');
 
 var _utils2 = _interopRequireDefault(_utils);
 
-var _carousel_styles = require('../style_modules/carousel_styles.js');
+var _carousel_styles = require('../style_modules/carousel_styles');
 
 var _carousel_styles2 = _interopRequireDefault(_carousel_styles);
 
@@ -40094,13 +40086,17 @@ var _reactSlick = require('react-slick');
 
 var _reactSlick2 = _interopRequireDefault(_reactSlick);
 
-var _product = require('./product.js');
-
-var _product2 = _interopRequireDefault(_product);
-
-var _videoItem = require('./videoItem.js');
+var _videoItem = require('./videoItem');
 
 var _videoItem2 = _interopRequireDefault(_videoItem);
+
+var _reactModal = require('react-modal');
+
+var _reactModal2 = _interopRequireDefault(_reactModal);
+
+var _modalContent = require('./modalContent');
+
+var _modalContent2 = _interopRequireDefault(_modalContent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -40111,7 +40107,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ToStyle = function ToStyle(props) {
-  var videosArray = props.videosArray || [];
+  var videoList = props.videoList || [];
   var sliderSettings = {
     dots: true,
     infinite: true,
@@ -40127,7 +40123,7 @@ var ToStyle = function ToStyle(props) {
     _react2.default.createElement(
       _reactSlick2.default,
       sliderSettings,
-      videosArray.map(eachItem, props)
+      videoList.map(eachItem, props)
     )
   );
 };
@@ -40136,27 +40132,401 @@ function eachItem(obj, index) {
   // retrieve originalProps with 'this'
   var originalProps = Object.assign({}, this);
   // avoid style related conflicts between modules, sremove classes,sheet and theme from props obj.
-  _utils2.default.removeObjectProperties(originalProps, ['videosArray', 'classes', 'sheet', 'theme']);
+  _utils2.default.removeObjectProperties(originalProps, ['videoList', 'classes', 'sheet', 'theme']);
 
   return _react2.default.createElement(
     'div',
     { key: index },
-    _react2.default.createElement(_videoItem2.default, _extends({ currentVideo: obj }, originalProps))
+    _react2.default.createElement(_videoItem2.default, _extends({ handleClick: this.handleClick, currentVideo: obj }, originalProps))
   );
 }
 
 var Styled = (0, _reactJss2.default)(_carousel_styles2.default)(ToStyle);
 
-var Carousel = function (_React$Component) {
-  _inherits(Carousel, _React$Component);
+var Carousel = function (_Component) {
+  _inherits(Carousel, _Component);
 
-  function Carousel() {
+  function Carousel(props) {
     _classCallCheck(this, Carousel);
 
-    return _possibleConstructorReturn(this, (Carousel.__proto__ || Object.getPrototypeOf(Carousel)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (Carousel.__proto__ || Object.getPrototypeOf(Carousel)).call(this, props));
+
+    _this.state = {
+      video: null,
+      modalIsOpen: false
+    };
+    return _this;
   }
 
   _createClass(Carousel, [{
+    key: 'closeModal',
+    value: function closeModal() {
+      this.setState({
+        video: null,
+        modalIsOpen: false
+      });
+    }
+  }, {
+    key: 'handleClick',
+    value: function handleClick(vid, isOpen) {
+      this.setState(function () {
+        var newState = {};
+        newState['video'] = vid;
+        newState['modalIsOpen'] = isOpen;
+        return newState;
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      _reactJss.jss.setup({
+        insertionPoint: document.getElementById('tvp_' + this.props.targetEl + '_root')
+      });
+      return _react2.default.createElement(
+        _reactJss.ThemeProvider,
+        { theme: this.props },
+        _react2.default.createElement(
+          'div',
+          null,
+          _react2.default.createElement(Styled, _extends({ handleClick: this.handleClick.bind(this) }, this.props)),
+          this.state.video && _react2.default.createElement(
+            _reactModal2.default,
+            {
+              isOpen: this.state.modalIsOpen,
+              onRequestClose: this.closeModal.bind(this),
+              contentLabel: this.state.video.title
+            },
+            _react2.default.createElement(_modalContent2.default, { closeModal: this.closeModal.bind(this), video: this.state.video, config: this.props })
+          )
+        )
+      );
+    }
+  }]);
+
+  return Carousel;
+}(_react.Component);
+
+;
+
+Carousel.propTypes = {
+  targetEl: _propTypes2.default.string.isRequired
+};
+
+module.exports = Carousel;
+
+},{"../style_modules/carousel_styles":296,"../utils":302,"./modalContent":290,"./videoItem":295,"prop-types":92,"react":278,"react-jss":226,"react-modal":239,"react-slick":245}],289:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactJss = require('react-jss');
+
+var _reactJss2 = _interopRequireDefault(_reactJss);
+
+var _loader_styles = require('../style_modules/loader_styles');
+
+var _loader_styles2 = _interopRequireDefault(_loader_styles);
+
+var _classnames = require('classnames');
+
+var _classnames2 = _interopRequireDefault(_classnames);
+
+var _jssVendorPrefixer = require('jss-vendor-prefixer');
+
+var _jssVendorPrefixer2 = _interopRequireDefault(_jssVendorPrefixer);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ToStyle = function ToStyle(props) {
+    return _react2.default.createElement(
+        'div',
+        { className: props.classes.tvp_loader_container },
+        _react2.default.createElement(
+            'p',
+            { className: props.classes.tvp_loader_text },
+            'Loading "',
+            props.config.targetEl,
+            '" Widget'
+        ),
+        _react2.default.createElement(
+            'div',
+            { className: props.classes.tvp_loader },
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child1) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child2) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child3) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child4) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child5) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child6) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child7) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child8) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child9) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child10) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child11) }),
+            _react2.default.createElement('div', { className: (0, _classnames2.default)(props.classes.tvp_loader_child, props.classes.tvp_loader_child12) })
+        )
+    );
+};
+
+var Styled = (0, _reactJss2.default)(_loader_styles2.default)(ToStyle);
+
+var Loader = function (_Component) {
+    _inherits(Loader, _Component);
+
+    function Loader() {
+        _classCallCheck(this, Loader);
+
+        return _possibleConstructorReturn(this, (Loader.__proto__ || Object.getPrototypeOf(Loader)).apply(this, arguments));
+    }
+
+    _createClass(Loader, [{
+        key: 'render',
+        value: function render() {
+            _reactJss.jss.setup({
+                insertionPoint: document.getElementById('tvp_' + this.props.config.targetEl + '_root')
+            });
+            return _react2.default.createElement(
+                _reactJss.ThemeProvider,
+                { theme: this.props },
+                _react2.default.createElement(Styled, this.props)
+            );
+        }
+    }]);
+
+    return Loader;
+}(_react.Component);
+
+Loader.propTypes = {
+    config: _propTypes2.default.object.isRequired
+};
+
+module.exports = Loader;
+
+},{"../style_modules/loader_styles":297,"classnames":3,"jss-vendor-prefixer":59,"prop-types":92,"react":278,"react-jss":226}],290:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactJss = require('react-jss');
+
+var _reactJss2 = _interopRequireDefault(_reactJss);
+
+var _modalContent_styles = require('../style_modules/modalContent_styles');
+
+var _modalContent_styles2 = _interopRequireDefault(_modalContent_styles);
+
+var _player = require('./player');
+
+var _player2 = _interopRequireDefault(_player);
+
+var _utils = require('../utils');
+
+var _utils2 = _interopRequireDefault(_utils);
+
+var _product = require('./product');
+
+var _product2 = _interopRequireDefault(_product);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ToStyle = function ToStyle(props) {
+	var originalProps = Object.assign({}, props);
+	// avoid style related conflicts between modules, remove classes,sheet and theme from props obj.
+	_utils2.default.removeObjectProperties(originalProps, ['config', 'closeModal', 'handleClose', 'classes', 'sheet', 'theme']);
+	return _react2.default.createElement(
+		'div',
+		{ id: 'tvp_modal_contents' },
+		_react2.default.createElement(
+			'div',
+			{ className: props.classes.tvp_modal_title },
+			props.video.title
+		),
+		_react2.default.createElement(
+			'button',
+			{ onClick: handleClick },
+			'Close'
+		),
+		_react2.default.createElement(_player2.default, _extends({ video: props.video, options: props.options }, originalProps)),
+		props.relatedProducts ? _react2.default.createElement(_product2.default, { relatedProducts: props.relatedProducts }) : null
+	);
+	function handleClick() {
+		props.handleClose();
+	};
+};
+
+var Styled = (0, _reactJss2.default)(_modalContent_styles2.default)(ToStyle);
+
+var TvpModal = function (_Component) {
+	_inherits(TvpModal, _Component);
+
+	function TvpModal(props) {
+		_classCallCheck(this, TvpModal);
+
+		var _this = _possibleConstructorReturn(this, (TvpModal.__proto__ || Object.getPrototypeOf(TvpModal)).call(this, props));
+
+		_this.state = {
+			relatedProducts: null
+		};
+		return _this;
+	}
+
+	_createClass(TvpModal, [{
+		key: 'componentWillMount',
+		value: function componentWillMount() {
+			var _this2 = this;
+
+			var config = this.props.config;
+			var logId = config.loginId;
+			var videoId = this.props.video.id;
+			_utils2.default.fetchData(logId, videoId, config, true).then(function (data) {
+				_this2.setState({
+					relatedProducts: data
+				});
+			});
+		}
+	}, {
+		key: 'render',
+		value: function render() {
+			return _react2.default.createElement(
+				_reactJss.ThemeProvider,
+				{ theme: this.props },
+				_react2.default.createElement(Styled, _extends({ relatedProducts: this.state.relatedProducts, handleClose: this.props.closeModal, options: this.props.config }, this.props))
+			);
+		}
+	}]);
+
+	return TvpModal;
+}(_react.Component);
+
+TvpModal.propTypes = {
+	video: _propTypes2.default.object.isRequired,
+	closeModal: _propTypes2.default.func.isRequired,
+	config: _propTypes2.default.object.isRequired
+};
+
+module.exports = TvpModal;
+
+},{"../style_modules/modalContent_styles":298,"../utils":302,"./player":291,"./product":292,"prop-types":92,"react":278,"react-jss":226}],291:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _reactJss = require('react-jss');
+
+var _reactJss2 = _interopRequireDefault(_reactJss);
+
+var _player_styles = require('../style_modules/player_styles');
+
+var _player_styles2 = _interopRequireDefault(_player_styles);
+
+var _ScriptCache = require('./ScriptCache');
+
+var _ScriptCache2 = _interopRequireDefault(_ScriptCache);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ToStyle = function ToStyle(props) {
+  return _react2.default.createElement(
+    'div',
+    { id: 'tvp_player_holder', className: props.classes.tvp_player_holder },
+    _react2.default.createElement(
+      'div',
+      { id: 'tvp_player', className: props.classes.tvp_player },
+      _react2.default.createElement('div', { id: 'tvp_player_el', className: props.classes.tvp_player_el })
+    )
+  );
+};
+
+var Styled = (0, _reactJss2.default)(_player_styles2.default)(ToStyle);
+
+var PlayerComp = function (_Component) {
+  _inherits(PlayerComp, _Component);
+
+  function PlayerComp(props) {
+    _classCallCheck(this, PlayerComp);
+
+    var _this2 = _possibleConstructorReturn(this, (PlayerComp.__proto__ || Object.getPrototypeOf(PlayerComp)).call(this, props));
+
+    _this2.state = {
+      player: null
+    };
+    _this2.initPlayer = _this2.initPlayer.bind(_this2);
+    return _this2;
+  }
+
+  _createClass(PlayerComp, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this = this;
+
+      var not = function not(obj) {
+        return 'undefined' === typeof obj;
+      };
+      if (not(window.TVPage) || not(window.Player)) {
+        this.cache = new _ScriptCache2.default(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js', 'https://a.tvpage.com/tvpa.min.js', 'static/src/modules/playerLib.js', 'static/src/modules/analytics.js']);
+        var libsCheck = 0;
+        (function libsReady() {
+          setTimeout(function () {
+            if ((not(window.TVPage) || not(window.Player)) && ++libsCheck < 50) {
+              libsReady();
+            } else {
+              _this.initPlayer();
+            }
+          }, 150);
+        })();
+      } else {
+        _this.initPlayer();
+      }
+    }
+  }, {
+    key: 'initPlayer',
+    value: function initPlayer() {
+      if (!window.test) window.test = new Player(document.getElementById('tvp_player_el'), this.props.options, this.props.video.id);
+    }
+  }, {
     key: 'render',
     value: function render() {
       _reactJss.jss.setup({
@@ -40164,25 +40534,24 @@ var Carousel = function (_React$Component) {
       });
       return _react2.default.createElement(
         _reactJss.ThemeProvider,
-        { theme: this.props.config },
+        { theme: this.props },
         _react2.default.createElement(Styled, this.props)
       );
     }
   }]);
 
-  return Carousel;
-}(_react2.default.Component);
+  return PlayerComp;
+}(_react.Component);
 
 ;
 
-Carousel.propTypes = {
-  name: _propTypes2.default.string.isRequired,
-  videosArray: _propTypes2.default.array.isRequired
+PlayerComp.propTypes = {
+  video: _propTypes2.default.object.isRequired
 };
 
-module.exports = Carousel;
+module.exports = PlayerComp;
 
-},{"../style_modules/carousel_styles.js":292,"../utils.js":295,"./product.js":289,"./videoItem.js":291,"prop-types":92,"react":278,"react-jss":226,"react-slick":245}],289:[function(require,module,exports){
+},{"../style_modules/player_styles":299,"./ScriptCache":287,"prop-types":92,"react":278,"react-jss":226}],292:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40207,11 +40576,7 @@ var _reactResizeToAspectRatio = require('react-resize-to-aspect-ratio');
 
 var _reactResizeToAspectRatio2 = _interopRequireDefault(_reactResizeToAspectRatio);
 
-var _ScriptCache = require('./ScriptCache.js');
-
-var _ScriptCache2 = _interopRequireDefault(_ScriptCache);
-
-var _product_styles = require('../style_modules/product_styles.js');
+var _product_styles = require('../style_modules/product_styles');
 
 var _product_styles2 = _interopRequireDefault(_product_styles);
 
@@ -40224,7 +40589,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var ProductToStyle = function ProductToStyle(props) {
-	var prodItems = props.producItems || [];
+	console.log(props);
+	var prodItems = props.relatedProducts || [];
 	return _react2.default.createElement(
 		'div',
 		{ className: props.classes.tvp_products_container },
@@ -40248,8 +40614,8 @@ function eachProduct(obj, index) {
 
 var StyledProduct = (0, _reactJss2.default)(_product_styles2.default)(ProductToStyle);
 
-var Product = function (_React$Component) {
-	_inherits(Product, _React$Component);
+var Product = function (_Component) {
+	_inherits(Product, _Component);
 
 	function Product() {
 		_classCallCheck(this, Product);
@@ -40258,40 +40624,143 @@ var Product = function (_React$Component) {
 	}
 
 	_createClass(Product, [{
-		key: 'componentWillMount',
-		value: function componentWillMount() {
-			if (!window.TVPage) new _ScriptCache2.default(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js']);
-		}
-	}, {
-		key: 'componentWillUnmount',
-		value: function componentWillUnmount() {
-			console.log('unmount');
-		}
-	}, {
 		key: 'render',
 		value: function render() {
 			_reactJss.jss.setup({
-				insertionPoint: document.getElementById('tvp_' + this.props.name + '_root')
+				insertionPoint: document.getElementById('tvp_' + this.props.targetEl + '_root')
 			});
 			return _react2.default.createElement(
 				_reactJss.ThemeProvider,
-				{ theme: this.props.config },
+				{ theme: this.props },
 				_react2.default.createElement(StyledProduct, this.props)
 			);
 		}
 	}]);
 
 	return Product;
-}(_react2.default.Component);
+}(_react.Component);
 
 Product.propTypes = {
-	name: _propTypes2.default.string.isRequired,
-	currentVideo: _propTypes2.default.object.isRequired
+	relatedProducts: _propTypes2.default.array.isRequired
 };
 
 module.exports = Product;
 
-},{"../style_modules/product_styles.js":293,"./ScriptCache.js":287,"prop-types":92,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],290:[function(require,module,exports){
+},{"../style_modules/product_styles":300,"prop-types":92,"react":278,"react-jss":226,"react-resize-to-aspect-ratio":240,"react-scrollbar":241}],293:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _elementResizeEvent = require('element-resize-event');
+
+var _elementResizeEvent2 = _interopRequireDefault(_elementResizeEvent);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Resize = function (_Component) {
+  _inherits(Resize, _Component);
+
+  function Resize(props) {
+    _classCallCheck(this, Resize);
+
+    var _this = _possibleConstructorReturn(this, (Resize.__proto__ || Object.getPrototypeOf(Resize)).call(this, props));
+
+    console.log(_this.props.children);
+
+    _this.state = {
+      element: null
+    };
+
+    _this.scaleToAspectRatio = _this.scaleToAspectRatio.bind(_this);
+    return _this;
+  }
+
+  _createClass(Resize, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      var _props$onChange = this.props.onChange,
+          onChange = _props$onChange === undefined ? function () {} : _props$onChange;
+
+      var element = this.wrap;
+      this.setState({ element: element });
+      this.scaleToAspectRatio(element);
+      (0, _elementResizeEvent2.default)(element, function (event) {
+        onChange(element, event);
+        _this2.scaleToAspectRatio(element);
+      });
+    }
+  }, {
+    key: 'aspectRatioMultiplier',
+    value: function aspectRatioMultiplier(ratio) {
+      if (!ratio) return 0;
+      if ((ratio.match(/:/g) || []).length !== 1) {
+        console.log('invalid aspect ratio');
+        return 0;
+      }
+      var ratioValues = ratio.split(':');
+      return ratioValues[1] / ratioValues[0];
+    }
+  }, {
+    key: 'scaleToAspectRatio',
+    value: function scaleToAspectRatio(el) {
+      var element = el || this.state.element;
+      var aspectRatio = this.props.aspectRatio;
+
+      var arm = this.aspectRatioMultiplier(aspectRatio);
+      if (!arm) return;
+      this.changeHeight(element, element.offsetWidth * this.aspectRatioMultiplier(aspectRatio));
+    }
+  }, {
+    key: 'changeHeight',
+    value: function changeHeight(element, val) {
+      element.style.height = val + 'px';
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this3 = this;
+
+      var aspectRatio = this.props.aspectRatio;
+
+      return _react2.default.createElement(
+        'div',
+        { style: { width: '100%' }, ref: function ref(c) {
+            _this3.wrap = c;
+          } },
+        this.props.children
+      );
+    }
+  }]);
+
+  return Resize;
+}(_react.Component);
+
+Resize.propTypes = {
+  children: _react.PropTypes.node.isRequired,
+  aspectRatio: _react.PropTypes.string,
+  style: _react.PropTypes.object,
+  onChange: _react.PropTypes.func
+};
+
+exports.default = Resize;
+
+},{"element-resize-event":11,"react":278}],294:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -40308,7 +40777,7 @@ var _reactJss = require('react-jss');
 
 var _reactJss2 = _interopRequireDefault(_reactJss);
 
-var _sidebar_styles = require('../style_modules/sidebar_styles.js');
+var _sidebar_styles = require('../style_modules/sidebar_styles');
 
 var _sidebar_styles2 = _interopRequireDefault(_sidebar_styles);
 
@@ -40330,8 +40799,8 @@ var ToStyle = function ToStyle(props) {
 
 var Styled = (0, _reactJss2.default)(_sidebar_styles2.default)(ToStyle);
 
-var Sidebar = function (_React$Component) {
-  _inherits(Sidebar, _React$Component);
+var Sidebar = function (_Component) {
+  _inherits(Sidebar, _Component);
 
   function Sidebar() {
     _classCallCheck(this, Sidebar);
@@ -40354,7 +40823,7 @@ var Sidebar = function (_React$Component) {
   }]);
 
   return Sidebar;
-}(_react2.default.Component);
+}(_react.Component);
 
 ;
 
@@ -40365,10 +40834,8 @@ Sidebar.propTypes = {
 
 module.exports = Sidebar;
 
-},{"../style_modules/sidebar_styles.js":294,"prop-types":92,"react":278,"react-jss":226}],291:[function(require,module,exports){
+},{"../style_modules/sidebar_styles":301,"prop-types":92,"react":278,"react-jss":226}],295:[function(require,module,exports){
 'use strict';
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -40384,17 +40851,9 @@ var _reactJss = require('react-jss');
 
 var _reactJss2 = _interopRequireDefault(_reactJss);
 
-var _reactResizeToAspectRatio = require('react-resize-to-aspect-ratio');
+var _resize = require('./resize');
 
-var _reactResizeToAspectRatio2 = _interopRequireDefault(_reactResizeToAspectRatio);
-
-var _reactModal = require('react-modal');
-
-var _reactModal2 = _interopRequireDefault(_reactModal);
-
-var _product = require('./product.js');
-
-var _product2 = _interopRequireDefault(_product);
+var _resize2 = _interopRequireDefault(_resize);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -40404,37 +40863,27 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// import styles from  '../style_modules/videoItem_styles.js';
+// import styles from  '../style_modules/videoItem_styles';
 
-var VideoItem = function (_React$Component) {
-  _inherits(VideoItem, _React$Component);
+var VideoItem = function (_Component) {
+  _inherits(VideoItem, _Component);
 
   function VideoItem(props) {
     _classCallCheck(this, VideoItem);
 
-    var _this = _possibleConstructorReturn(this, (VideoItem.__proto__ || Object.getPrototypeOf(VideoItem)).call(this, props));
-
-    _this.state = {
-      modalIsOpen: false,
-      currProducts: {}
-    };
-    _this.openModal = _this.openModal.bind(_this);
-    _this.closeModal = _this.closeModal.bind(_this);
-    return _this;
+    return _possibleConstructorReturn(this, (VideoItem.__proto__ || Object.getPrototypeOf(VideoItem)).call(this, props));
   }
 
   _createClass(VideoItem, [{
-    key: 'closeModal',
-    value: function closeModal() {
-      this.setState({ modalIsOpen: false });
+    key: 'handleClick',
+    value: function handleClick() {
+      window.currentVideo = this.props.currentVideo;
+      this.props.handleClick(this.props.currentVideo, true);
     }
   }, {
-    key: 'openModal',
-    value: function openModal() {
-      this.setState({
-        modalIsOpen: true,
-        currProducts: this.props.currentVideo.videoProducts
-      });
+    key: 'handleChange',
+    value: function handleChange(e) {
+      console.log(e);
     }
   }, {
     key: 'render',
@@ -40446,44 +40895,17 @@ var VideoItem = function (_React$Component) {
         'backgroundSize': 'cover',
         'backgroundPosition': 'center',
         'backgroundRepeat': 'no-repeat'
-      },
-          modalStyles = {
-        overlay: {
-          position: 'fixed',
-          top: '0px',
-          left: '0px',
-          right: '0px',
-          bottom: '0px',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
-        },
-        content: {
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          right: '40px',
-          bottom: '40px',
-          border: '1px solid rgb(204, 204, 204)',
-          backgroundColor: 'rgb(255, 255, 255)',
-          overflow: 'hidden',
-          borderRadius: '4px',
-          outline: 'none',
-          padding: '20px',
-          width: '50%',
-          transform: 'translate(-50%, -50%)'
-        }
-      },
-          getParent = function getParent() {
-        return document.querySelector('#tvp_' + this.props.name + '_modal_holder');
       };
+
       return _react2.default.createElement(
         'div',
         null,
         _react2.default.createElement(
-          _reactResizeToAspectRatio2.default,
-          { aspectRatio: '16:9' },
+          _resize2.default,
+          { aspectRatio: '16:9', onChange: this.handleChange.bind(this) },
           _react2.default.createElement(
             'div',
-            { onClick: this.openModal.bind(this) },
+            { onClick: this.handleClick },
             _react2.default.createElement('div', { style: styles })
           )
         ),
@@ -40491,55 +40913,26 @@ var VideoItem = function (_React$Component) {
           'div',
           { style: { position: 'relative', textAlign: 'center' } },
           this.props.currentVideo.title
-        ),
-        _react2.default.createElement(
-          _reactModal2.default,
-          { isOpen: this.state.modalIsOpen, onRequestClose: this.closeModal,
-            shouldCloseOnOverlayClick: true,
-            style: modalStyles,
-            parentSelector: getParent.bind(this),
-            bodyOpenClassName: 'tvp_' + this.props.name + "_modal_open",
-            contentLabel: 'tvp_' + this.props.name + '_modal',
-            portalClassName: 'tvp_' + this.props.name + '_modal_container',
-            className: {
-              base: 'tvp_' + this.props.name + '_modal',
-              afterOpen: 'tvp_' + this.props.name + '_modal_afterOpen',
-              beforeClose: 'tvp_' + this.props.name + '_modal_beforeClose'
-            },
-            overlayClassName: {
-              base: 'tvp_' + this.props.name + '_modal_overlay',
-              afterOpen: 'tvp_' + this.props.name + '_modal_overlay_afterOpen',
-              beforeClose: 'tvp_' + this.props.name + '_modal_overlay_beforeClose'
-            }
-          },
-          _react2.default.createElement(
-            'h2',
-            null,
-            this.props.currentVideo.title
-          ),
-          _react2.default.createElement('div', { className: 'box1' }),
-          _react2.default.createElement(_product2.default, _extends({ producItems: this.state.currProducts }, this.props))
         )
       );
     }
   }]);
 
   return VideoItem;
-}(_react2.default.Component);
+}(_react.Component);
 
 ;
 
 VideoItem.propTypes = {
-  name: _propTypes2.default.string.isRequired
+  targetEl: _propTypes2.default.string.isRequired
 };
 
 module.exports = VideoItem;
 
-},{"./product.js":289,"prop-types":92,"react":278,"react-jss":226,"react-modal":239,"react-resize-to-aspect-ratio":240}],292:[function(require,module,exports){
+},{"./resize":293,"prop-types":92,"react":278,"react-jss":226}],296:[function(require,module,exports){
 "use strict";
 
 var styles = function styles(style) {
-	console.log(style);
 	return {
 		tvp_carousel_container: {
 			margin: "0 auto",
@@ -40571,17 +40964,183 @@ module.exports = styles;
 // stroke-linecap: round;
 // stroke-width: 5;
 
-},{}],293:[function(require,module,exports){
+},{}],297:[function(require,module,exports){
+'use strict';
+
+var styles = function styles(style) {
+  return {
+    '@import': [' url(//fonts.googleapis.com/css?family=Open+Sans)'],
+    tvp_loader_container: {
+      textAlign: 'center'
+    },
+    tvp_loader_text: {
+      color: '#e57211',
+      fontSize: '18px',
+      fontWeight: 'bold',
+      textTransform: 'uppercase',
+      fontFamily: '"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif'
+    },
+    tvp_loader: {
+      margin: '0 auto',
+      width: '40px',
+      height: '40px',
+      position: 'relative'
+    },
+    tvp_loader_child: {
+      width: '100%',
+      height: '100%',
+      position: 'absolute',
+      left: '0',
+      top: '0',
+      '&:before': {
+        content: '""',
+        display: 'block',
+        margin: '0 auto',
+        width: '15%',
+        height: '15%',
+        backgroundColor: '#e57211',
+        borderRadius: '100%',
+        animation: {
+          name: 'tvpAnimationLoader',
+          duration: '1.2s',
+          timingFunction: 'ease-in-out',
+          iterationCount: 'infinite',
+          direction: 'both'
+        }
+      }
+    },
+    tvp_loader_child2: {
+      transform: 'rotate(30deg)',
+      '&:before': {
+        animationDelay: '-1.1s'
+      }
+    },
+    tvp_loader_child3: {
+      transform: 'rotate(60deg)',
+      '&:before': {
+        animationDelay: '-1s'
+      }
+    },
+    tvp_loader_child4: {
+      transform: 'rotate(90deg)',
+      '&:before': {
+        animationDelay: '-0.9s'
+      }
+    },
+    tvp_loader_child5: {
+      transform: 'rotate(120deg)',
+      '&:before': {
+        animationDelay: '-0.8s'
+      }
+    },
+    tvp_loader_child6: {
+      transform: 'rotate(150deg)',
+      '&:before': {
+        animationDelay: '-0.7s'
+      }
+    },
+    tvp_loader_child7: {
+      transform: 'rotate(180deg)',
+      '&:before': {
+        animationDelay: '-0.6s'
+      }
+    },
+    tvp_loader_child8: {
+      transform: 'rotate(210deg)',
+      '&:before': {
+        animationDelay: '-0.5s'
+      }
+    },
+    tvp_loader_child9: {
+      transform: 'rotate(240deg)',
+      '&:before': {
+        animationDelay: '-0.4s'
+      }
+    },
+    tvp_loader_child10: {
+      transform: 'rotate(270deg)',
+      '&:before': {
+        animationDelay: '-0.3s'
+      }
+    },
+    tvp_loader_child11: {
+      transform: 'rotate(300deg)',
+      '&:before': {
+        animationDelay: '-0.2s'
+      }
+    },
+    tvp_loader_child12: {
+      transform: 'rotate(330deg)',
+      '&:before': {
+        animationDelay: '-0.1s'
+      }
+    },
+    '@keyframes tvpAnimationLoader': {
+      '0%, 80%, 100%': {
+        transform: 'scale(0)'
+      },
+      '40%': {
+        transform: 'scale(1)'
+      }
+    }
+  };
+};
+
+module.exports = styles;
+
+},{}],298:[function(require,module,exports){
+"use strict";
+
+var styles = function styles(style) {
+  return {
+    tvp_modal_title: {
+      color: "red"
+    }
+  };
+};
+
+module.exports = styles;
+
+},{}],299:[function(require,module,exports){
+'use strict';
+
+var styles = function styles(style) {
+  return {
+    tvp_player_holder: {
+      width: "80%",
+      float: 'left'
+    },
+    tvp_player: {
+      height: 0,
+      width: '100%',
+      position: 'relative',
+      paddingBottom: '56.25%'
+    },
+    tvp_player_el: {
+      backgroundColor: '#000',
+      backgroundSize: 'cover',
+      position: 'absolute',
+      top: 0,
+      bottom: 0,
+      right: 0,
+      left: 0,
+      width: '100%',
+      height: '100%'
+    }
+  };
+};
+
+module.exports = styles;
+
+},{}],300:[function(require,module,exports){
 'use strict';
 
 var styles = function styles(style) {
 	return {
 		tvp_products_container: style.tvp_products_container,
-		tvp_products_scroller: {
-			height: '100%'
-		},
+		tvp_products_scroller: {},
 		tvp_products_scroller_content: {
-			paddingRight: '15px'
+			paddingRight: '0'
 		},
 		tvp_product_item_container: {
 			margin: '5px 0',
@@ -40609,7 +41168,7 @@ var styles = function styles(style) {
 
 module.exports = styles;
 
-},{}],294:[function(require,module,exports){
+},{}],301:[function(require,module,exports){
 "use strict";
 
 var styles = function styles(style) {
@@ -40622,19 +41181,50 @@ var styles = function styles(style) {
 
 module.exports = styles;
 
-},{}],295:[function(require,module,exports){
-"use strict";
+},{}],302:[function(require,module,exports){
+'use strict';
+
+var _jquery = require('jquery');
+
+var _jquery2 = _interopRequireDefault(_jquery);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 module.exports = {
+  fetchData: function fetchData(loginId, id, config, products) {
+    if (!loginId) return console.warn('Need loginId');
+    var url = void 0;
+    var cbName = 'tvp_' + Math.floor(Math.random() * 555);
+
+    if (!products) {
+      url = config.api_base_url + '/channels/' + id + '/videos?X-login-id=' + loginId + '&p=0&n=1000&callback=' + cbName;
+      var params = config.channel.parameters || {};
+      for (var i in params) {
+        if (!params[i] || !params[i].length) break;
+        url += "&" + i + "=" + params[i];
+      }
+    } else {
+      url = config.api_base_url + '/videos/' + id + '/products?X-login-id=' + loginId + '&callback=' + cbName;
+    }
+
+    url = window.encodeURI(url);
+
+    return Promise.resolve(_jquery2.default.get({
+      url: url,
+      type: 'GET',
+      crossDomain: true,
+      dataType: 'jsonp'
+    }));
+  },
+  getType: function getType(e) {
+    if (!e || !this.isset(e, "type")) throw new Error("Must pass \"Widget.TYPE\"");
+    var evt = e.type;
+    return evt.charAt(0).toUpperCase() + evt.slice(1);
+  },
   isset: function isset(o, p) {
     var val = o;
     if (p) val = o[p];
     return "undefined" !== typeof val;
-  },
-  getType: function getType(e) {
-    if (!e || !this.isset(e, "config") || !this.isset(e.config, "type")) throw new Error("Must pass \"Widget.TYPE\"");
-    var evt = e.config.type;
-    return evt.charAt(0).toUpperCase() + evt.slice(1);
   },
   removeObjectProperties: function removeObjectProperties(obj, props) {
     for (var i = 0; i < props.length; i++) {
@@ -40645,4 +41235,4 @@ module.exports = {
   }
 };
 
-},{}]},{},[286]);
+},{"jquery":46}]},{},[286]);

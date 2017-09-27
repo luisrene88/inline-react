@@ -2,10 +2,9 @@ const styles = (style) => {
 	return({
 		tvp_products_container: style.tvp_products_container,
 		tvp_products_scroller: {
-			height:'100%'
 		},
 	    tvp_products_scroller_content: {
-			paddingRight:'15px'
+			paddingRight:'0'
 		},
 		tvp_product_item_container: {
 			margin: '5px 0',
