@@ -6,7 +6,7 @@ const styles = (style) => {
 			maxWidth: "100%",
 			maxHeight: "100%",
 			color: "#333",
-			background: "#eaeaea"
+			background: "#f5f5f5"
 		}
 	});               
 };

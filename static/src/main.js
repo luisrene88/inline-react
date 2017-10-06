@@ -1,14 +1,19 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import PropTypes from 'prop-types';
-import $ from 'jquery';
-import Utils from './utils';
-import Loader from './modules/loader'
+
+import videoStore from './libs/store';
+import Utils from './libs/utils';
+import dispatcher from './libs/dispatcher';
+import * as actions  from './libs/actions';
+
+import {ThemeProvider ,jss} from 'react-jss';
+import vendorPrefixer from 'jss-vendor-prefixer';
+import Loader from './modules/loader';
 
 function Widget(props){
   const widgetProps = Object.assign({}, props);
-  Utils.removeObjectProperties(widgetProps,['type']);
-
+  Utils.removeObjectProperties(widgetProps,['type','classes', 'rule', 'sheet']);
   let WidgetRequired;
   switch (Utils.getType(props)) {
     case 'Carousel':
@@ -24,39 +29,40 @@ function Widget(props){
 class Main extends Component{
   constructor(props){
     super(props);
-
     this.state = {
       videoList: null
     }
   }
-  componentDidMount(){
-    const config = this.props.config;
-    const logId = config.loginId;
-    const channId = config.channel.id;
-
-    Utils.fetchData(logId, channId, config, false)
-      .then((res) => {
-        this.setState({
-          videoList: res
-        });
+  componentWillMount(){
+    const { config } = this.props;
+    actions.fetchVideos(config);
+    videoStore.on('received', () =>{
+      this.setState({
+        videoList: videoStore.getAll()
       });
+    });
   }
   render(){
+    const { config } = this.props;
+    jss.setup({
+      insertionPoint: document.getElementById('tvp_'+config.targetEl+'_root')
+    });
     return (
-      <div id={'tvp_'+this.props.config.targetEl+'_root'}>
-        {!this.state.videoList
-          ? <Loader config={this.props.config}/>
-          : <Widget videoList={this.state.videoList} {...this.props.config}/>
-        }
-        <div id={'tvp_'+this.props.config.targetEl+'_modal_holder'}></div>
-        <div id={'tvp_'+this.props.config.targetEl+'_styles_holder'}></div>
-      </div>
+      <ThemeProvider theme={config}>
+          <div id={'tvp_'+config.targetEl+'_root'}>
+            {!this.state.videoList
+              ? <Loader config={config}/>
+              : <Widget videoList={this.state.videoList} {...config}/>
+            }
+            <div id={'tvp_'+config.targetEl+'_modal_holder'}></div>
+          </div>
+      </ThemeProvider>
     );
   }
 }
 
-Main.PropTypes = {
-  config: PropTypes.array.isRequired
+Main.propTypes = {
+  config: PropTypes.object.isRequired
 };
 
 window.__TVPage__ = window.__TVPage__ || {};

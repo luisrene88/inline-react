@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import injectSheet,{jss} from 'react-jss';
 import styles from  '../style_modules/sidebar_styles';
 
-jss.setup({media:'caca'},{
-  virtual:true
-});
-
 @injectSheet(styles)
 class Sidebar extends Component{
   render(){

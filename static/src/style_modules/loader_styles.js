@@ -4,7 +4,10 @@ const styles = (style) => {
      ' url(//fonts.googleapis.com/css?family=Open+Sans)'
     ],
     tvp_loader_container:{
-      textAlign: 'center'
+      position:'absolute',
+      top:'50%',
+      left:'50%',
+      transform: 'translate(-50%,-50%)',
     },
     tvp_loader_text:{
       color: '#e57211',
@@ -115,6 +118,38 @@ const styles = (style) => {
       '40%':{
         transform:'scale(1)'
       }
+    },
+    tvp_div_loader:{
+      position: 'relative',
+      height: '90%',
+      backgroundRepeat:'no-repeat',
+      backgroundPosition:'center',
+      backgroundSize:'cover',
+      backgroundImage: 'url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAV4AAACWAQMAAACsKXI0AAAABlBMVEXq6urq6uqJJbp/AAABN0lEQVRYw+3UIXLDMBBA0b+yRhHwTAUNCnQEg4JCwR7DsLBH2BT1WDpKj+AjFET2TICUkLL9yMq8ceRoHbAsy7Isy7Is65bsAFO9+3Dv4NfACsvalu8sEOYOzkKGHNvygwTRdTeiGYpvix8SJBlibfeSSIKMDvF0u3YN1wEW2hfPkQSF8gzmeVweYiEjoBT0xLmDHZkJlCzHNmoXe6ZfB0pyQER2tIs3PqMDJXog8uYH+IstOFB8BCLrNMABnAPFJSCCDLCAOFAk3zDax2jD1CdwQb7vcB1irnfbKOUBFs4HpAxmoyBXhOOngzrGgnAcCugYo8Jx3KB5MKII6jgGCXT0WuEogWNEEZJo/wQ923wOP45l6tg1sC2k5Xyt1hkfOviy8/LLpZ74sre/NMuyLMuyLMv6h/4AtYM2UT3qPicAAAAASUVORK5CYII=)'
+    },
+    tvp_div_text_loader:{
+      position: 'relative',
+      height: '5%',
+      backgroundColor: '#eaeaea',
+      margin:'5px 0'
+    },
+    tvp_div_text_loader2:{
+      width: '50%',
+      height: '5%',
+      position: 'relative',
+      backgroundColor: '#eaeaea'
+    },
+    tvp_loader_wrapper:{
+      position: 'relative',
+      maxWidth: '100%',
+      maxHeight: '100%',
+      padding: '40px',
+      backgroundColor: ' #f5f5f5'
+    },
+    tvp_div_loader_container:{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-evenly'
     }
   });               
 };

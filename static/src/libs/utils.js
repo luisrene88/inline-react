@@ -27,7 +27,6 @@ module.exports = {
       }));
   },
   uniqueHashClassName: function(rule, sheet){
-    console.log(this)
     let random = Math.floor(Math.random().toString());
     let current_date = (new Date()).valueOf().toString();
     return 'tvp_'+current_date + random;
