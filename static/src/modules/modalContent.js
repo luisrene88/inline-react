@@ -39,9 +39,9 @@ class TvpModal extends Component{
     // avoid style related conflicts between modules, remove classes,sheet and theme from props obj.
     Utils.removeObjectProperties(originalProps,['config','closeModal','handleClose','classes','sheet',]);
     return (
-      <div id='tvp_modal_contents'>
+      <div className={classes.tvp_modal_content}>
         <div className={classes.tvp_modal_title}>{video.title}</div>
-        <button onClick={this.handleClick.bind(this)}>Close</button>
+        <div className={classes.tvp_modal_close_btn} onClick={this.handleClick.bind(this)}>X</div>
         <Player hasProducts={hasProducts} video={video} options={options} {...originalProps}/>
         {relatedProducts &&
           <Product relatedProducts={relatedProducts}/>

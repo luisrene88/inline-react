@@ -346,6 +346,7 @@
         this.setConfig();
         this.addAssets(this.options.data[0]);
         this.startPlayer();
+        this.resize();
     };
 
     window.Player = Player;

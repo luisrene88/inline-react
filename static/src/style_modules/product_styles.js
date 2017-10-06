@@ -2,16 +2,22 @@ const styles = (style) => {
 	return({
 		tvp_products_container: style.tvp_products_container,
 		tvp_products_scroller: {
+      height:'382.5px'
 		},
 	    tvp_products_scroller_content: {
 			paddingRight:'0'
 		},
 		tvp_product_item_container: {
-			'paddingTop':'56.25%',
-      'position':'relative'
+      'display':'block',
+			'paddingTop':'100%',
+      'position':'relative',
+      'margin':'5px 0',
+      '&:firstChild':{
+        margin:'0 !important'
+      }
 		},
 		tvp_product_item: {
-			'backgroundSize':'cover',
+			'backgroundSize':'contain',
       'backgroundPosition':'center',
       'backgroundRepeat':'no-repeat',
       'position':'absolute',

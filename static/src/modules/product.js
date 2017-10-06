@@ -9,19 +9,21 @@ class Product extends Component{
   constructor(props) {
     super(props);
   }
-  eachProduct(val, key){
-  	const prodImg = { 'backgroundImage':'url('+val.imageUrl+')' };
+  eachProduct(prod){
+  	const { classes } = this.props,
+      prodImg = { 'backgroundImage':'url('+prod.imageUrl+')' };
 		return(
-			<div key={key} className={this.props.classes.tvp_product_item_container}>
-				<div className={this.props.classes.tvp_product_item} style={prodImg}></div>
-			</div>
+			<a key={prod.id} href={prod.linkUrl} className={classes.tvp_product_item_container}>
+				<div className={classes.tvp_product_item} style={prodImg}></div>
+			</a>
 		);
   }
 	render(){
+    const {classes, relatedProducts } = this.props;
 		return (
-			<div className={this.props.classes.tvp_products_container}>
-				<ScrollArea className={this.props.classes.tvp_products_scroller} contentClassName={this.props.classes.tvp_products_scroller_content}>
-					{this.props.relatedProducts.map(this.eachProduct.bind(this))}	
+			<div className={classes.tvp_products_container}>
+				<ScrollArea className={classes.tvp_products_scroller} contentClassName={classes.tvp_products_scroller_content}>
+					{relatedProducts.map(this.eachProduct.bind(this))}	
 				</ScrollArea>
 			</div>
 		);

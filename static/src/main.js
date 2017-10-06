@@ -8,8 +8,9 @@ import dispatcher from './libs/dispatcher';
 import * as actions  from './libs/actions';
 
 import {ThemeProvider ,jss} from 'react-jss';
-import vendorPrefixer from 'jss-vendor-prefixer';
+import jssNested from 'jss-nested';
 import Loader from './modules/loader';
+jss.use(jssNested());
 
 function Widget(props){
   const widgetProps = Object.assign({}, props);
@@ -47,6 +48,7 @@ class Main extends Component{
     jss.setup({
       insertionPoint: document.getElementById('tvp_'+config.targetEl+'_root')
     });
+    console.log(jss)
     return (
       <ThemeProvider theme={config}>
           <div id={'tvp_'+config.targetEl+'_root'}>

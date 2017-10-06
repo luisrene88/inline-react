@@ -1,8 +1,11 @@
 const styles = (style) => {
   return({
     tvp_player_holder:{
-      width:"80%",
-      float:'left'
+        width:'80%',
+        float:'left'
+    },
+    tvp_player_holder_full:{
+        width:'100%'
     },
     tvp_player:{
     	height:0,

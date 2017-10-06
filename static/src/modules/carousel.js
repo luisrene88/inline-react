@@ -51,7 +51,9 @@ class Carousel extends Component{
     });
   }
   render(){
-    const {carousel_settings, classes} = this.props;
+    const {carousel_settings, classes, videoList} = this.props;
+    const { video, modalIsOpen } = this.state;
+    carousel_settings.dots = (videoList.length > 2 && videoList.length < 10 ? carousel_settings.dots : false);
     return (
         <div>
           <div className={classes.carousel_container}>
@@ -59,13 +61,19 @@ class Carousel extends Component{
               {this.props.videoList.map(this.eachItem.bind(this))}
             </Slider>
           </div>
-          {this.state.video && 
+          {video && 
             <Modal 
-            isOpen={this.state.modalIsOpen}
+             className={{
+              base: classes.tvp_modal_base
+            }}
+            overlayClassName={{
+              base: classes.tvp_modal_overlay
+            }}
+            isOpen={modalIsOpen}
             onRequestClose={this.closeModal.bind(this)} 
-            contentLabel={this.state.video.title}
+            contentLabel={video.title}
             >
-              <ModalContent closeModal={this.closeModal.bind(this)} video={this.state.video} config={this.props}/>
+              <ModalContent closeModal={this.closeModal.bind(this)} video={video} config={this.props}/>
             </Modal>
           }
         </div>

@@ -14,7 +14,8 @@ class Player extends Component{
   constructor(props){
     super(props);
     this.state = {
-      video: this.props.video
+      video: props.video,
+      hasProducts: props.hasProducts
     }
   }
   componentDidMount(){
@@ -53,11 +54,12 @@ class Player extends Component{
           autonext: true
     },video.id);
     playerLib.initialize();
+    playerLib.resize();
   }
   render(){
-    const {classes} = this.props;
+    const {classes, hasProducts} = this.props;
     return (
-      <div id='tvp_player_holder' className={classNames(classes.tvp_player_holder)}>
+      <div id='tvp_player_holder' className={(hasProducts?classes.tvp_player_holder:classes.tvp_player_holder_full)}>
         <div id='tvp_player' className={classes.tvp_player}>
           <div id='tvp_player_el' className={classes.tvp_player_el}></div>
         </div>
