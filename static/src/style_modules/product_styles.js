@@ -2,18 +2,22 @@ const styles = (style) => {
 	return({
 		tvp_products_container: style.tvp_products_container,
 		tvp_products_scroller: {
-      height:'382.5px'
+      height:'100%'
 		},
 	    tvp_products_scroller_content: {
-			paddingRight:'0'
+			paddingRight:'10%'
 		},
 		tvp_product_item_container: {
       'display':'block',
 			'paddingTop':'100%',
       'position':'relative',
       'margin':'5px 0',
-      '&:firstChild':{
-        margin:'0 !important'
+      'border': '1px solid #333',
+      '&:first-child':{
+        marginTop:'0'
+      },
+      '&:last-child':{
+        marginBottom:'0'
       }
 		},
 		tvp_product_item: {

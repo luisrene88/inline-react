@@ -8,17 +8,25 @@ const styles = (style) => {
 			color: "#333",
 			background: "#f5f5f5"
 		},
+    tvp_modal_opened:{
+      overflow:'hidden'
+    },
     tvp_modal_base:{
       position: 'fixed',
       top: '50%',
       left: '50%',
       transform: 'translate(-50%,-50%)',
       width: '890px',
-      height: 'auto',
+      height: '460px',
       backgroundColor: '#fff',
       outline: 'none',
-      padding: '20px',
       boxShadow: '0 2px 18px 0 rgba(0,0,0,0.5)'
+    },
+    tvp_modal_base_open:{
+      display:'block'
+    },
+    tvp_modal_base_closed:{
+      display:'none'
     },
     tvp_modal_overlay:{
       position: 'fixed',
@@ -27,6 +35,12 @@ const styles = (style) => {
       right: 0,
       bottom: 0,
       backgroundColor: 'rgba(0,0,0,0.5)'
+    },
+    tvp_modal_overlay_open:{
+      display:'block'
+    },
+    tvp_modal_overlay_closed:{
+      display:'none'
     }
 	});               
 };

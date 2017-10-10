@@ -48,7 +48,6 @@ class Main extends Component{
     jss.setup({
       insertionPoint: document.getElementById('tvp_'+config.targetEl+'_root')
     });
-    console.log(jss)
     return (
       <ThemeProvider theme={config}>
           <div id={'tvp_'+config.targetEl+'_root'}>

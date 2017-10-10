@@ -21,12 +21,12 @@ class Player extends Component{
   componentDidMount(){
     const _this = this;
     const not = (obj) => {return 'undefined' === typeof obj};
-    if (not(window.TVPage)) {
-        this.cache = new ScriptCache(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js','https://a.tvpage.com/tvpa.min.js','static/src/libs/analytics.js']);
+    if (not(window.TVPage)|| not(window._tvpa) || not(window.Analytics)) {
+        new ScriptCache(['https://cdnjs.tvpage.com/tvplayer/tvp-3.1.1.min.js','https://a.tvpage.com/tvpa.min.js','static/src/libs/analytics.js']);
         let libsCheck = 0;
         (function libsReady() {
             setTimeout(() => {
-                if ((not(window.TVPage)) && (++libsCheck < 50)) {
+                if ((not(window.TVPage)|| not(window._tvpa) || not(window.Analytics)) && (++libsCheck < 50)) {
                     libsReady();
                 } else {
                     _this.initPlayer();

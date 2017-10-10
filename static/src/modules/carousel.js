@@ -51,7 +51,7 @@ class Carousel extends Component{
     });
   }
   render(){
-    const {carousel_settings, classes, videoList} = this.props;
+    const {carousel_settings, classes, videoList, targetEl} = this.props;
     const { video, modalIsOpen } = this.state;
     carousel_settings.dots = (videoList.length > 2 && videoList.length < 10 ? carousel_settings.dots : false);
     return (
@@ -63,15 +63,24 @@ class Carousel extends Component{
           </div>
           {video && 
             <Modal 
-             className={{
-              base: classes.tvp_modal_base
-            }}
-            overlayClassName={{
-              base: classes.tvp_modal_overlay
-            }}
-            isOpen={modalIsOpen}
-            onRequestClose={this.closeModal.bind(this)} 
-            contentLabel={video.title}
+              className={{
+                base: classes.tvp_modal_base,
+                afterOpen: classes.tvp_modal_base_open,
+                beforeClose: classes.tvp_modal_base_closed
+              }}
+              overlayClassName={{
+                base: classes.tvp_modal_overlay,
+                afterOpen: classes.tvp_modal_overlay_open,
+                beforeClose: classes.tvp_modal_overlay_closed
+              }}
+              portalClassName={'tvp_'+targetEl+'_modal_holder'}
+              bodyOpenClassName={classes.tvp_modal_opened}
+              isOpen={modalIsOpen}
+              onRequestClose={this.closeModal.bind(this)} 
+              contentLabel={video.title}
+              aria={{
+                describedby: video.description
+              }}
             >
               <ModalContent closeModal={this.closeModal.bind(this)} video={video} config={this.props}/>
             </Modal>
